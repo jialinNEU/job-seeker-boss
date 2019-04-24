@@ -4,6 +4,10 @@
     padding-left: 10px;
 }
 
+* {
+    touch-action: none;
+}
+
 /* Genius/Boss主页 TabBar */
 .am-tab-bar {
     position: fixed;
@@ -34,7 +38,6 @@
     text-align: right;
 }
 
-/*
 #chat-page .am-grid-icon {
     display: none;
 }
@@ -42,7 +45,6 @@
 #chat-page .am-grid-text {
     margin-top: 0;
 }
-*/
 
 .stick-footer {
     position: absolute;

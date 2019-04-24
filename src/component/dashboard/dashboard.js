@@ -9,6 +9,10 @@ import Boss from '../boss/boss';
 import Genius from '../genius/genius';
 import User from '../user/user';
 
+import {getMsgList, recvMsg} from '../../redux/chat.redux';
+
+
+
 function Message() {
     return <h2>Message首页</h2>
 }
@@ -16,12 +20,16 @@ function Message() {
 
 
 @connect(
-    state=>state
+    state=>state,
+    {getMsgList, recvMsg}
 )
 class Dashboard extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
+
+    componentDidMount() {
+        if (!this.props.chat.chatmsg.length) {
+            this.props.getMsgList();
+            this.props.recvMsg();    
+        }
     }
 
     render() {

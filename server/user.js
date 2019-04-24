@@ -98,13 +98,23 @@ Router.get('/info', function(req, res) {
 
 
 Router.get('/getmsglist', function(req, res) {
-    const user = req.cookies.user;
-    // $or表示两者满足其一就被获取
-    Chat.find({'$or': [{from: user, to: user}]}, function(err, doc) {
-        if (!err) {
-            return res.json({code: 0, msgs: doc});
-        }
+    const userid = req.cookies.userid;
+
+    User.find({}, function(err, doc) {
+        let users = {};
+        doc.forEach(v=>{
+            users[v._id] = {name: v.user, avatar: v.avatar};
+        });
+
+        // $or表示两者满足其一就被获取
+        Chat.find({'$or': [{from: userid}, {to: userid}]}, function(err, doc) {
+            if (!err) {
+                return res.json({code: 0, msgs: doc, users: users});
+            }
+        });
     });
+
+
 });
 
 

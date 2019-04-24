@@ -15,7 +15,7 @@ io.on('connection', function(socket) {
     // 参数socket为当前的连接
     socket.on('sendmsg', function(data) {
         const {from, to, msg} = data;
-        const chatid = [from, to].sort().join();
+        const chatid = [from, to].sort().join('_');
         Chat.create({chatid, from, to, content: msg}, function(err, doc) {
             // data是客户端传送过来的
             // io.emit发送给全局，与本次连接的socket不同
