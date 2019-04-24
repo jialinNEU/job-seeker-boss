@@ -12,6 +12,7 @@ import Register from './container/register/register';
 import BossInfo from './container/bossinfo/bossinfo';
 import GeniusInfo from './container/geniusinfo/geniusinfo';
 import Dashboard from './component/dashboard/dashboard';
+import Chat from './component/chat/chat';
 
 import reducer from './reducer.js';
 import './config';
@@ -22,7 +23,7 @@ import './index.css';
 // applyMiddleware 用来管理中间件，从而处理异步
 // 使用redux的 compose 结合 thunk 和 window.devToolsExtension
 
-const reduxDevtools = window.devToolsExtension ? window.devToolsExtension() : ()=>{};
+const reduxDevtools = window.devToolsExtension ? window.devToolsExtension() : f=>f;
 
 // createStore还可以接受preloadState作为第二个参数，可以在进入页面前进行读取sessionStorage，并传入createStore中作为初始状态
 const store = createStore(
@@ -43,6 +44,7 @@ ReactDom.render(
                     <Route path='/bossinfo' component={BossInfo}></Route>
                     <Route path='/login' component={Login}></Route>
                     <Route path='/register' component={Register}></Route>
+                    <Route path='/chat/:user' component={Chat}></Route>
                     <Route component={Dashboard}></Route>
                 </Switch>
             </div>

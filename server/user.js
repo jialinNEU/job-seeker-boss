@@ -6,6 +6,7 @@ const Router = express.Router();
 
 const models = require('./model');
 const User = models.getModel('user');
+const Chat = models.getModel('chat');
 
 // MongoDB的过滤器
 const _filter = {'pwd':0, '__v':0}
@@ -94,6 +95,18 @@ Router.get('/info', function(req, res) {
         }
     })
 });
+
+
+Router.get('/getmsglist', function(req, res) {
+    const user = req.cookies.user;
+    // $or表示两者满足其一就被获取
+    Chat.find({'$or': [{from: user, to: user}]}, function(err, doc) {
+        if (!err) {
+            return res.json({code: 0, msgs: doc});
+        }
+    });
+});
+
 
 
 // MD5 加强加密（salt加密）

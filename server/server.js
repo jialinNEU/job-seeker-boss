@@ -3,9 +3,27 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
 const userRouter = require('./user.js');
+const Chat = require('./model').getModel('chat');
 
 // 新建app
 const app = express();
+
+// socket和express关联
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+io.on('connection', function(socket) {
+    // 参数socket为当前的连接
+    socket.on('sendmsg', function(data) {
+        const {from, to, msg} = data;
+        const chatid = [from, to].sort().join();
+        Chat.create({chatid, from, to, content: msg}, function(err, doc) {
+            // data是客户端传送过来的
+            // io.emit发送给全局，与本次连接的socket不同
+            io.emit('recvmsg', Object.assign({}, doc._doc));
+        });
+    });
+})
+
 
 // 使用中间件
 
@@ -20,6 +38,6 @@ app.get('/', function(req, res){
 });
 
 // 监听端口
-app.listen(9093, function(){
+server.listen(9093, function(){
     console.log('App starts at port 9093')
 });
