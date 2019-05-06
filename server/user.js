@@ -113,8 +113,24 @@ Router.get('/getmsglist', function(req, res) {
             }
         });
     });
+});
 
 
+Router.post('/readmsg', function(req, res) {
+    const userid = req.cookies.userid;
+    const { from } = req.body;
+    // 更新发给用户自己的信息未读状态，userid就是当前登录的用户
+    Chat.update({from, to: userid}, 
+        {'$set': {read: true}},
+        {'multi': true}, 
+        function(err, doc) {
+            // doc结构：{n: ***, nModified: ***, ok: 1}
+            if (!err) {
+                return res.json({code: 0, num: doc.nModified});
+            }
+            return res.json({code: 1, msg: '修改失败'});
+        }
+    );
 });
 
 

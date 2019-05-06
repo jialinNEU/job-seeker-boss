@@ -8,14 +8,9 @@ import NavLinkBar from '../navlinkbar/navlinkbar';
 import Boss from '../boss/boss';
 import Genius from '../genius/genius';
 import User from '../user/user';
+import Message from '../message/message';
 
 import {getMsgList, recvMsg} from '../../redux/chat.redux';
-
-
-
-function Message() {
-    return <h2>Message首页</h2>
-}
 
 
 

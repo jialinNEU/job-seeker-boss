@@ -3,14 +3,14 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { List, InputItem, NavBar, Icon, Grid } from 'antd-mobile';
 
-import {getMsgList, sendMsg, recvMsg} from '../../redux/chat.redux';
+import {getMsgList, sendMsg, recvMsg, readMsg} from '../../redux/chat.redux';
 import { getChatId } from '../../util';
 
 
 
 @connect(
   state=>state,
-  {getMsgList, sendMsg, recvMsg}
+  {getMsgList, sendMsg, recvMsg, readMsg}
 )
 class Chat extends Component {
 
@@ -25,8 +25,17 @@ class Chat extends Component {
       this.props.getMsgList();
       this.props.recvMsg();
     }
+
+    const to = this.props.match.params.user;
+    this.props.readMsg(to);
     this.fixCarousel();
-  } 
+  }
+
+  // 当在聊天页面中对方发来消息后，在退出当前聊天时将之前的消息设置为已读
+  componentWillUnmount() {
+    const to = this.props.match.params.user;
+    this.props.readMsg(to);
+  }
 
   
   fixCarousel() {
