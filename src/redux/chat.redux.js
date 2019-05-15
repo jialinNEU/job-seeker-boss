@@ -98,3 +98,14 @@ export function readMsg(from) {
       });
   }
 }
+
+// async + await 改写
+export function readMsgAsyncAwait(from) {
+  return async (dispatch, getState) => {
+    const res = await axios.post('/user/readmsg', {from});
+    const userid = getState().user_id;
+    if (res.status === 200 && res.data.code === 0) {
+      dispatch(msgRead({userid, from, num: res.data.num}));
+    }
+  }
+}

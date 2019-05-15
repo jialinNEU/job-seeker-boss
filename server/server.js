@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const userRouter = require('./user.js');
 const Chat = require('./model').getModel('chat');
@@ -32,6 +33,15 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 // '/user' 作为路由前缀，以后的路由由userRoute决定
 app.use('/user', userRouter);
+
+app.use(function(req, res, next) {
+    if (req.url.startsWith('/user/') || req.url.startsWith('/static/')) {
+        return next();
+    }
+    return res.sendFile(path.resolve('build/index.html'));
+});
+// 白名单
+app.use('/', express.static(path.resolve('build')));
 
 app.get('/', function(req, res){
     res.send('<h1>Boss/Genius App Backend</h1>')
