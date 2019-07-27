@@ -1,0 +1,211 @@
+功能页面设计：
+
+- 用户中心：登录，注册，信息完善
+- 求职者：  求职信息，职位列表，聊天
+- Boss：    管理职位，查看求职者，聊天
+
+文件架构：
+
+- src前端源码目录
+- server后端express目录
+- 功能文件夹：component (组件)，container (页面)，reducer
+- 页面入口处获取用户信息，决定跳转到哪个页面
+
+Router划分页面：
+
+- 进入应用获取用户信息，若未登录，则跳转到Login页面
+- Login和Register页面不需要权限认证
+- 用户信息，聊天列表，职位列表页面共享底部的TabBar
+
+Axios发送异步请求：
+
+- 增加两个action creator，一个用来返回action对象，另一个用来异步使用
+- reducer中增加新action的case
+
+export function getUserData() {
+    // dispatch用来通知数据修改
+    return dispatch => {
+        axios.get('/data').then(res => {
+            if(res.status === 200) {
+                dispatch(userData(res.data));
+            }
+        });
+    }
+}
+
+export function userData(data) {
+    return {type: USER_DATA, payload: data}
+}
+
+
+Axios拦截器：
+
+- axios.interceptors设置拦截器，如全局的loading
+- axios.get, axios.post发送请求，返回promise对象
+
+
+**********************************************************************
+**********************************************************************
+**********************************************************************
+
+
+
+-----------------------------------------------------------
+
+工程目录：
+/component: 公共组件
+/container: 业务页面（组件）
+/redux: reducers
+/server: 服务端代码
+
+
+/component组件介绍：
+- Logo组件：Logo
+- AuthRoute组件：仅用来检测路由是否符合要求
+    * 用户信息：
+        a. 是否登录
+        b. 当前url，判断是否需要跳转
+        c. 用户的类型，boss或genius
+        d. 用户个人信息是否完善
+- AvatarSelector组件：用户头像选择（在boss或genius信息页中使用）
+
+- Dashboard组件：登录后（且完善信息后）的起始页
+- NavlinkBar组件：Dashboard的底部菜单栏，根据用户类型（geinus或boss）显示不同列表（boss列表或genius列表）
+- Boss组件：作为genius登录时候，展示boss列表
+- Genius组件：作为boss登录时候，展示genius列表
+- UserCard组件：Boss组件和Genius组件的子组件，根据传入的userlist显示user列表
+
+- User组件：底部菜单栏的个人中心
+- FormHOC组件：高阶组件，用于Login和Register，主要作用是代码复用和逻辑抽象，通过装饰器装饰到Login和Register上面
+- Message组件：聊天信息栏，根据chatid对聊天用户进行分组
+
+
+/container页面介绍：
+- Login页面：登录页面
+- Register页面：注册页面
+- BossInfo页面：boss信息页
+- GeniusInfo页面：genius信息页
+
+
+/reducer介绍：
+- user.redux.js: 用户相关的reducer
+    * ActionTypes
+        - AUTH_SUCCESS
+        - ERROR_MSG
+        - LOAD_DATA
+        - LOG_OUT
+    * 同步Action Creators
+        - errorMsg: 返回ERROR_MSG的action对象
+        - authSuccess：返回AUTH_SUCCESS的action对象
+        - loadData：返回LOAD_DATA的action对象
+        - logoutSubmit: 返回LOG_OUT的action对象
+    * 异步Action Creators（对axios调用的包装，返回一个dispatch为参数的axios异步调用，会通过@connect传入到组件上）
+        - function login ({user, pwd}) {...}
+        - function register ({user, pwd, repeatpwd, type}) {...}
+        - function update (data) {...}
+    * Reducer
+        - function user (state, action) {...}
+            * reducer根据combineReducers创建的模块名称，通过state.moduleName获取
+    * InitState
+        - redirectTo: ''
+        - msg: ''
+        - user: ''
+        - type: ''
+
+
+- chatuser.redux.js: 用户首页获取boss或genius列表相关的reducer
+    * ActionTypes
+        - USER_LIST
+    * 同步ActionCreators
+        - userList: 返回USER_LIST的action对象
+    * 异步ActionCreators
+        - function getUserList (type) {...} ==> 返回特定类型用户的用户列表
+    * Reducer
+        - function chatuser (state, action) {...}
+    * InitState
+        - userlist: []
+
+
+- chat.redux.js: 聊天相关的reducer
+    * ActionTypes
+        - MSG_LIST
+        - MSG_RECV
+        - MSG_READ
+    * 同步ActionCreators
+        - msgList: 返回MSG_LIST的action对象
+    * 异步ActionCreators
+        - function getMsgList () {...}
+        - function sendMsg({from, to, msg}) {...}
+        - function recvMsg() {...}
+    * Reducer
+        - function chat (state, action) {...}
+    * InitState
+        - chatmsg: []
+        - unread: 0
+
+
+/server：
+- server.js：根路径下相关的express接口
+    * app.use('/user', userRouter): '/user' 作为路由前缀，以后的路由由userRoute决定(在server/user.js文件中)
+    * app.use(cookieParser()): 使得express可以在req或res中存储/使用cookie
+    * app.use(bodyParser.json()): 使得expres可以接受post请求传递的参数
+    * app.get('/', fn)
+
+- user.js：与用户相关的express接口
+    * 使用express.router()中间件，挂载与用户相关接口
+    * GET '/info': 返回当前用户信息
+    * GET '/list': 返回所有用于信息，可添加query
+    * POST '/update': 更新用户信息
+    * POST '/login': 登录请求
+    * POST '/register': 注册请求
+
+    * GET '/getmsglist': 返回所有与该用户相关的聊天信息
+
+- model.js: 数据库操作
+    * 数据模型：
+        a. user: 
+            - user
+            - pwd
+            - type
+            - avatar
+            - description
+            - title
+            - company（boss独有）
+            - money（boss独有）
+        b. chat
+            - chatid
+            - from
+            - to
+            - content
+            - create_time
+            - read (Boolean类型)
+
+
+    * 根据数据模型（user或chat）创建Schema，并通过schema创建model
+    * 连接DB
+
+
+其他文件：
+- util.js: 
+    * getRedirectPath(): 根据用户信息，返回跳转地址
+    * getChatId(): 返回chat id
+
+
+开发路由组件的流程（以聊天组件为例）：
+chat.js <---> chat.redux.js <---> server.js/user.js
+1. index.js中引入并添加到Route中
+2. 创建该路由组件，并进行简单渲染
+3. 前后端联调，测试axios请求
+4. 实现相关Reducer及ActionCreator
+5. 完善前后端代码及CSS样式
+    * 所有socket的逻辑都在redux和后端里，Chat组件只调用redux暴露的dispatch异步函数
+
+
+
+TODO:
+- （ISSUE）Login显示用户名不存在后，进入Register，该msg仍然显示
+- （ISSUE）若未登录直接输入localhost: 3000/bossinfo会闪现bossinfo页面，然后跳转到Login页面
+- （ISSUE) 在/me路径下刷新页面会报错（原因：authroute请求的个人信息还未返回）
+- （ISSUE）当新用户注册后，dashboard和chat都会在componentDidMount中调用redux注入的方法，致使聊天过程中同一个信息被渲染两次
+
+

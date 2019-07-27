@@ -1,0 +1,168 @@
+antd-mobile         ==> React UI Library
+babel-plugin-import ==> 按需加载antd-mobile组件，在package.json下的babel字段下配置
+
+redux-thunk         ==> 让Redux异步处理，使用 redux 的 applyMiddleware
+
+prop-types          ==>
+
+Redux DevTools      ==> 新建store时，通过window.devToolsExtension判断
+                    ==> 使用redux的 compose 结合 thunk 和 window.devToolsExtension
+
+react-redux         ==> 提供 Provider 组件，用在最外层，用于传入一次性store，通过context对象传递给子孙组件上的connect
+                    ==> 提供 Connect 方法，用于从外部获取组件所需参数，可以使用decorator形式
+
+babel-plugin-transform-decorators-legacy
+                    ==> 支持 decorator 写法
+                    ==> 在package.json下的babel字段下配置
+
+
+react-router-dom    ==> 使用 BrowserRouter，包裹整个应用
+                    ==> 使用 Route 路由对应渲染的组件，可嵌套
+                        - url参数: Route组件可以用冒号标示参数
+                        <Route path='/:location' component={Text}></Route>
+                        * 可以通过打印this.props，查看history以及location对象
+
+                    ==> 使用 Link 跳转
+                    ==> 使用 Redirect 跳转
+                        <Redirect to='/'></Redirect>
+
+                    ==> 使用 Switch 只渲染一个子 Route 组件
+
+                    ==> 使用 withRouter 将一个普通组件转换为一个路由组件，继而可以操作路由
+
+redux               ==> combineReducer 合并多个 Reducers
+                    ==> applyMiddleware 用来管理中间件，从而处理异步
+                    ==> createStore 创建Store
+
+Axios
+
+- 使用 Proxy 配置转发，在package.json下的babel字段下配置
+- Axios拦截器，统一 Loading 处理
+- Redux使用异步数据，渲染页面
+
+
+第三方库/插件
+
+- cookie-parser     ==> server端解析cookie
+
+* express依赖cookie-parser，从而进行基于cookie的用户验证
+* cookie类似一张身份卡，登陆后服务端返回，你带着cookie就可以访问受限资源
+
+- browser-cookies   ==> client端操作cookie
+
+- body-parser       ==> 接收post参数
+- utility           ==> MD5 加密
+- prop-types        ==> 类型校验（在avatar-selector.js中使用）
+
+
+
+Socket.io基础:
+1）Socket.io是什么
+  - 基于事件的实时双向通信的实现socket协议的库
+    * 基于websocket协议
+    * 前后端通过事件进行双向通信
+
+2）与Ajax的区别
+  - 基于不同的网络协议
+    * Ajax基于http协议（单向），实时获取数据只能轮询或长链接（long pulling，等到收到response才返回）
+    * Socket.io基于websocket协议的双向通信协议，后端可以主动推送数据
+
+3）Socket后端API
+  - 后端配合express
+    * io = require('socket.io')(http)
+    * io.on ==> 监听事件
+    * io.emit ==> 触发事件
+  - 前端配合express
+    * import io from 'socket.io-client'
+    * io.on ==> 监听事件
+    * io.emit ==> 触发事件
+
+
+React
+- 当执行它this.setState的时候，会执行shouldComponentUpdate, componentWillUpdate, render以及componentDidUpdate
+- 当父组件更新的时候，先执行componentWillReceiveProps，再执行上述的其余生命周期函数
+- setState函数是一个队列操作，将当前要修改的状态存入队列，进而异步更新状态；在render中执行setState会造成死循环
+
+Redux
+- createStore方法返回subscribe, getState以及dispatch三个函数
+- createStore接收reducer和applyMiddleware
+
+React-Redux
+- 包含Provider类和connect函数
+
+React-thunk
+- 源代码
+
+
+
+React性能优化
+- React组件性能优化
+    * 属性传递优化
+    * 多组件之间优化
+    * key
+- Redux性能优化
+    * 对纯函数优化，使用reselect进行缓存
+- React同构
+    * 首屏服务端渲染的DOM
+
+
+1. 单一组件优化
+1） <button onClick={this.handleClick.bind(this)} ></button>
+    <button {()=>this.handleClick()} ></button>
+    <button onClick={this.handleClick} ></button> （已经在constructor中绑定）
+
+    - 第一种：每次执行render，bind都会执行一次
+    - 第二种：每次执行render，都会重新生成一次函数
+    - 第三种：推荐写法
+
+2） <div style={ {color: 'red'} } ></div>
+    <div style={ cssStyle } ></div> （render函数中定义 cssStyle={color: 'red'}）
+
+    - 第一种：每次执行render，都会重新生成一个新的对象
+    - 第二种：推荐写法
+
+2. shouldComponentUpdate
+- 用于多组件优化，当父组件更新的时候，子组件会自动执行更新
+- 在url栏的最后加上：/react-perf，然后在performance中进行record，可以观测react组件变化
+  * 选中某一块之后，查看User Timing
+
+3. Immutable.js
+- 意义：React建议只做浅层比较（React.PureComponent）
+- 不可变数据结构的优点：节省内存（不需要修改），降低可变带来的复杂度
+- Immutable collections should be treated as values rather than objects. 
+  * Immutable.is() function or .equals() method to determine 'value equality' 
+    instead of the === operator which determines 'object reference identity'
+- 优点：
+  * 减少内存使用
+  * 并发安全
+  * 降低项目复杂度
+  * 函数式编程
+- 缺点：
+  * 学习成本
+  * 库的大小（替代方案：seamless-immutable）
+  * 对现有项目入侵严重
+
+4. reselect优化redux选择器
+- 作用：对数据进行缓存，避免redux每次都进行重复的计算
+- 见ReselectTodo.js
+
+import { createSelector } from 'reselect';
+
+const numSelector = createSelector(
+  state=>state,
+  // 第二个函数的参数，是第一个的返回值
+  state=>({num: state * 2})
+);
+
+@connect(
+  state=>numSelector(state),
+  {ActionCreators}
+)
+
+5. React服务端渲染SSR
+1）传统服务端渲染：JSP，smaty，jinja2等，首屏较快，但是每次都刷新页面，影响交互
+2）传统服务端渲染：通过js获取数据，在前端拼接html，然后渲染在浏览器上，避免了每次都刷新页面，只进行局部刷新，但是首屏较慢
+3）前后端同构：首屏采用服务端渲染，之后的交互仍旧使用浏览器端渲染
+4）React同构API
+  - RenderToNodeStream
+  - 客户端采用hydrate取代render
